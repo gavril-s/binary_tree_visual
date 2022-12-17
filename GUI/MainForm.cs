@@ -41,13 +41,14 @@ namespace GUI
             {
                 Alignment = StringAlignment.Center,
                 LineAlignment = StringAlignment.Center,
-                Trimming = StringTrimming.None,
+                Trimming = StringTrimming.EllipsisCharacter,
                 FormatFlags = StringFormatFlags.NoWrap
             };
 
             int h = tree.Depth();
-            double base_n = 5;
-            double n = base_n - (-1.0 / ((h / 3.75) + 1.0 / base_n) + base_n);
+            double base_n = 10;
+            double n = base_n - (-1.0 / ((h / 5.0) + 1.0 / base_n) + base_n);
+            Console.WriteLine(n);
             double r = treePictureBox.Width / (Math.Pow(2, h) + n * Math.Pow(2, h - 1) + n);
 
             List<(int?, int?)> allCenters = new List<(int?, int?)>();
@@ -89,7 +90,8 @@ namespace GUI
 
                     if (l > 0 && parent != null)
                     {
-                        g.DrawLine(Pens.Black,
+                        Pen pen = new Pen(Color.Black, 2);
+                        g.DrawLine(pen,
                             prevLayerCenters[j / 2].Item1,
                             prevLayerCenters[j / 2].Item2,
                             (int)Math.Round(centerWidth),
@@ -102,7 +104,7 @@ namespace GUI
                 }
                 prevLayerCenters = new List<(int, int)>(layerCenters);
                 layerCenters.Clear();
-                centerHeight += (treePictureBox.Height - r) / h;
+                centerHeight += treePictureBox.Height / h;
             }
 
             double textWidth = r * Math.Sqrt(3);
@@ -130,6 +132,12 @@ namespace GUI
                     }
                 }
             }
+            if (fontSize < 8)
+            {
+                fontSize = 8;
+                stringFont = new Font("Lato", fontSize);
+            }
+
 
             for (int i = 0; i < allCenters.Count; i++)
             {
@@ -168,18 +176,6 @@ namespace GUI
             }
 
             treePictureBox.Image = treeDrawing;
-        }
-
-        private void insert(int val)
-        {
-            tree.Insert(val);
-            drawTree();
-        }
-
-        private void remove(int val)
-        {
-            tree.Remove(val);
-            drawTree();
         }
 
         private int? getIntFromTextBox(TextBox tx)
