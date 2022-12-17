@@ -13,31 +13,51 @@ namespace GUI
 {
     public partial class MainForm : Form
     {
+        // двоичное дерево поиска
+        // которое мы будем визуализировать
         private BinaryTree.BinaryTree tree;
 
         public MainForm()
         {
+            /*
+             * Конструктор по умолчанию.
+             * Инициализирует пустое дерево
+             * и рисует его
+            */
+
             InitializeComponent();
             this.Resize += MainForm_Resize;
             addButton.Click += addButton_Click;
             removeButton.Click += removeButton_Click;
+            replaceButton.Click += replaceButton_Click;
             tree = new BinaryTree.BinaryTree();
             drawTree();
         }
 
         private void drawTree()
         {
+            /*
+             * Функция, отображающая 
+             * дерево (this.tree) на
+             * экране
+            */
+
+            // Получаем вершины дерева в массиве
             List<int?> heap = tree.HeapStyle();
 
+            // Создаём изображение, на котором будем рисовать дерево
+            // В конце функции мы установим его в treePictureBox
             Bitmap treeDrawing = new Bitmap(treePictureBox.Width, treePictureBox.Height);
             Graphics g = Graphics.FromImage(treeDrawing);
 
+            // Настраиваем графику
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
             g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
             g.TextRenderingHint = TextRenderingHint.SingleBitPerPixelGridFit;
 
-            StringFormat format = new StringFormat()
+            // Настраиваем форматирование текста
+            StringFormat textFormat = new StringFormat()
             {
                 Alignment = StringAlignment.Center,
                 LineAlignment = StringAlignment.Center,
@@ -45,24 +65,44 @@ namespace GUI
                 FormatFlags = StringFormatFlags.NoWrap
             };
 
+
+            // высота дерева
             int h = tree.Depth();
+
+            // n - количество радиусов вершин,
+            // которые будут откладываться
+            // между вершинами.
+            // Зависит от высоты
             double base_n = 10;
             double n = base_n - (-1.0 / ((h / 5.0) + 1.0 / base_n) + base_n);
-            Console.WriteLine(n);
+
+            // радиус вершины
             double r = treePictureBox.Width / (Math.Pow(2, h) + n * Math.Pow(2, h - 1) + n);
 
+            // массив с координатами центров всех вершин
             List<(int?, int?)> allCenters = new List<(int?, int?)>();
+
+            // массив с координатами центров вершин предыдущего слоя
+            // (используется в цикле ниже)
             List<(int, int)> prevLayerCenters = new List<(int, int)>();
+
+            // массив с координатами центров вершин текущего слоя
+            // (используется в цикле ниже)
             List<(int, int)> layerCenters = new List<(int, int)>();
 
+            // y-координата центра вершины
             double centerHeight = r;
+
             for (int l = 0; l < h; l++)
             {
+                // x-координата центра вершины
                 double centerWidth = 0;
+
                 for (int j = 0; j < Math.Pow(2, l); j++)
                 {
                     centerWidth += treePictureBox.Width / (Math.Pow(2, l) + 1);
 
+                    // родительская вершина для текущей
                     int? parent = 0;
                     if (l == 1)
                     {
@@ -73,6 +113,7 @@ namespace GUI
                         parent = heap[(int)Math.Round(Math.Pow(2, l - 1)) - 1 + j / 2];
                     }
 
+                    // решаем, добавлять ли вершину
                     if (l == 0 || parent != null)
                     {
                         allCenters.Add((
@@ -88,6 +129,7 @@ namespace GUI
                         ));
                     }
 
+                    // рисуем связь вершины с родительской
                     if (l > 0 && parent != null)
                     {
                         Pen pen = new Pen(Color.Black, 2);
@@ -98,7 +140,6 @@ namespace GUI
                             (int)Math.Round(centerHeight)
                             );
                     }
-                    
 
                     layerCenters.Add(((int)Math.Round(centerWidth), (int)Math.Round(centerHeight)));
                 }
@@ -107,6 +148,8 @@ namespace GUI
                 centerHeight += treePictureBox.Height / h;
             }
 
+
+            // Подбираем размер шрифта
             double textWidth = r * Math.Sqrt(3);
             double textHeight = r;
 
@@ -139,6 +182,8 @@ namespace GUI
             }
 
 
+            // Рисуем вершины из списка, который
+            // составили ранее
             for (int i = 0; i < allCenters.Count; i++)
             {
                 if (allCenters[i].Item1 != null &&
@@ -171,10 +216,12 @@ namespace GUI
                         new Rectangle((int)allCenters[i].Item1 - (int)Math.Round(textWidth / 2),
                                       (int)allCenters[i].Item2 - (int)Math.Round(textHeight / 2),
                                       (int)Math.Round(textWidth),
-                                      (int)Math.Round(textHeight)), format);
+                                      (int)Math.Round(textHeight)), textFormat);
                 }
             }
 
+            // Устанавливаем изображение в treePictureBox,
+            // чтобы оно отобразилось на экране
             treePictureBox.Image = treeDrawing;
         }
 
@@ -204,12 +251,28 @@ namespace GUI
 
         private void MainForm_Resize(object sender, System.EventArgs e)
         {
+            /*
+             * Вызывается при изменении размеров 
+             * окна. Перерисовывает дерево,
+             * так как параметры (размеры 
+             * области отрисовки) 
+             * изменились
+            */
+
             drawTree();
         }
 
         private void addButton_Click(object sender, EventArgs e)
         {
-            int? val = getIntFromTextBox(inputTextBox);
+            /*
+             * Вызывается при нажатии
+             * кнопки "Add".
+             * Вызывает соответствуюшую
+             * операцию у this.tree
+             * и перерисовывает его
+            */
+
+            int? val = getIntFromTextBox(singleInputBox);
             if (val != null)
             {
                 tree.Insert((int)val);
@@ -219,10 +282,37 @@ namespace GUI
          
         private void removeButton_Click(object sender, EventArgs e)
         {
-            int? val = getIntFromTextBox(inputTextBox);
+            /*
+             * Вызывается при нажатии
+             * кнопки "Remove".
+             * Вызывает соответствуюшую
+             * операцию у this.tree
+             * и перерисовывает его
+            */
+
+            int? val = getIntFromTextBox(singleInputBox);
             if (val != null)
             {
                 tree.Remove((int)val);
+                drawTree();
+            }
+        }
+
+        private void replaceButton_Click(object sender, EventArgs e)
+        {
+            /*
+            * Вызывается при нажатии
+            * кнопки "Replace".
+            * Вызывает соответствуюшую
+            * операцию у this.tree
+            * и перерисовывает его
+           */
+
+            int? oldVal = getIntFromTextBox(doubleInputFirstBox);
+            int? newVal = getIntFromTextBox(doubleInputSecondBox);
+            if (oldVal != null && newVal != null)
+            {
+                tree.Replace((int)oldVal, (int)newVal);
                 drawTree();
             }
         }

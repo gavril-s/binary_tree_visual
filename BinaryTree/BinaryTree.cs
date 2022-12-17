@@ -8,22 +8,43 @@ namespace BinaryTree
 {
     public class BinaryTree
     {
+        /*
+         * Класс, описывающий
+         * двоичное дерево поиска
+         * (BST)
+        */
+
+        // корень дерева
         private BinaryTreeNode root;
 
         public BinaryTree()
         {
+            /*
+             * Конструктор по умолчанию 
+            */
+
             root = null;
         }
 
         private BinaryTreeNode firstMatchingInOrder
             (BinaryTreeNode node, Func<BinaryTreeNode, bool> f)
         {
+            /*
+             * Функция, которая обходит дерево
+             * в inorder-порядке начиная с
+             * вершины node и возвращает
+             * первую вершину, удовлетворяющую
+             * условию f (что значит, что f
+             * вернула true)
+            */
+
             if (node == null)
             {
                 return null;
             }
 
-            BinaryTreeNode left = firstMatchingInOrder(node.left, f);
+            BinaryTreeNode left =
+                firstMatchingInOrder(node.left, f);
             if (left != null)
             {
                 return left;
@@ -34,7 +55,8 @@ namespace BinaryTree
                 return node;
             }
 
-            BinaryTreeNode right = firstMatchingInOrder(node.left, f);
+            BinaryTreeNode right =
+                firstMatchingInOrder(node.left, f);
             if (right != null)
             {
                 return right;
@@ -46,21 +68,53 @@ namespace BinaryTree
         private BinaryTreeNode firstMatchingInOrder
             (Func<BinaryTreeNode, bool> f)
         {
+            /*
+             * Функция, которая обходит дерево
+             * в inorder-порядке и возвращает
+             * первую вершину, удовлетворяющую
+             * условию f (что значит, что f
+             * вернула true)
+            */
+
             return firstMatchingInOrder(root, f);
         }
 
         private int depth(BinaryTreeNode node)
         {
+            /*
+             * Возвращает глубину
+             * дерева, корнем которого
+             * является вершина node
+            */
+
             if (node == null)
             {
                 return 0;
             }
 
-            return 1 + Math.Max(depth(node.left), depth(node.right));
+            return 1 + Math.Max(
+                depth(node.left),
+                depth(node.right));
         }
 
         public List<int?> HeapStyle()
         {
+            /*
+             * Возвращает дерево,
+             * записанное в массив
+             * по слоям
+             * 
+             * Например,
+             *    1
+             *   / \
+             *  0   3
+             *     / \
+             *    2   4
+             * 
+             * будет записано как
+             * [1, 0, 3, null, null, 2, 4]
+            */
+
             List<int?> res = new List<int?>();
 
             if (root == null)
@@ -68,7 +122,8 @@ namespace BinaryTree
                 return res;
             }
 
-            List<BinaryTreeNode> layer = new List<BinaryTreeNode> { root };
+            List<BinaryTreeNode> layer =
+                new List<BinaryTreeNode> { root };
             bool notNullLayer = true;
             while (notNullLayer)
             {
@@ -83,8 +138,9 @@ namespace BinaryTree
                         res.Add(null);
                     }
                 }
-                
-                List<BinaryTreeNode> nextLayer = new List<BinaryTreeNode>();
+
+                List<BinaryTreeNode> nextLayer =
+                    new List<BinaryTreeNode>();
                 notNullLayer = false;
                 for (int i = 0; i < layer.Count; i++)
                 {
@@ -95,7 +151,8 @@ namespace BinaryTree
                         continue;
                     }
 
-                    if (layer[i].left != null || layer[i].right != null)
+                    if (layer[i].left != null ||
+                        layer[i].right != null)
                     {
                         notNullLayer = true;
                     }
@@ -110,11 +167,21 @@ namespace BinaryTree
 
         public int Depth()
         {
+            /*
+             * Возвращает глубину
+             * дерева
+            */
+
             return depth(root);
         }
 
         public bool Contains(int val)
         {
+            /*
+             * Проверяет, содержится
+             * ли val в дереве
+            */
+
             if (root == null)
             {
                 return false;
@@ -144,6 +211,12 @@ namespace BinaryTree
 
         public void Insert(int val)
         {
+            /*
+             * Вставляет в дерево
+             * новую вершину со
+             * значением val
+            */
+
             if (root == null)
             {
                 root = new BinaryTreeNode(val);
@@ -155,32 +228,51 @@ namespace BinaryTree
                 {
                     if (val > curr.value)
                     {
+                        // Вставляем в правое поддерево
+
                         if (curr.right == null)
                         {
+                            // В поддереве никого нет,
+                            // добавляем новую вершину
+
                             curr.right = new BinaryTreeNode(val);
                             curr.right.parent = curr;
                             break;
                         }
                         else
                         {
+                            // Продолжаем поиск 
+                            // в правом поддереве
+
                             curr = curr.right;
                         }
                     }
                     else if (val < curr.value)
                     {
+                        // Вставляем в левое поддерево
+
                         if (curr.left == null)
                         {
+                            // В поддереве никого нет,
+                            // добавляем новую вершину
+
                             curr.left = new BinaryTreeNode(val);
                             curr.left.parent = curr;
                             break;
                         }
                         else
                         {
+                            // Продолжаем поиск 
+                            // в левом поддереве
+
                             curr = curr.left;
                         }
                     }
                     else
                     {
+                        // Нашли val в дереве.
+                        // В BST не может быть одинаковых
+                        // значений!
                         return;
                     }
                 }
@@ -189,6 +281,11 @@ namespace BinaryTree
 
         public void Remove(int val)
         {
+            /*
+             * Удаляет вершину
+             * из дерева
+            */
+
             if (root == null)
             {
                 return;
@@ -199,6 +296,9 @@ namespace BinaryTree
             {
                 if (val > curr.value)
                 {
+                    // Ищем в правом
+                    // поддереве
+
                     if (curr.right == null)
                     {
                         return;
@@ -210,6 +310,9 @@ namespace BinaryTree
                 }
                 else if (val < curr.value)
                 {
+                    // Ищем в левом
+                    // поддереве
+
                     if (curr.left == null)
                     {
                         return;
@@ -221,8 +324,13 @@ namespace BinaryTree
                 }
                 else
                 {
+                    // Нашли val в дереве.
+                    // Удаляем
+
                     if (curr.left == null && curr.right == null)
                     {
+                        // Потомков нет, удаляем просто так
+
                         if (curr == root)
                         {
                             root = null;
@@ -242,6 +350,9 @@ namespace BinaryTree
                     }
                     else if (curr.left == null && curr.right != null)
                     {
+                        // Есть правый потомок,
+                        // заменяем им удаляемую вершину
+
                         if (curr == root)
                         {
                             root = curr.right;
@@ -263,6 +374,9 @@ namespace BinaryTree
                     }
                     else if (curr.left != null && curr.right == null)
                     {
+                        // Есть левый потомок,
+                        // заменяем им удаляемую вершину
+
                         if (curr == root)
                         {
                             root = curr.left;
@@ -284,18 +398,27 @@ namespace BinaryTree
                     }
                     else if (curr.left != null && curr.right != null)
                     {
+                        // Ищем вершину, которую можно вставить
+                        // на место удаляемой, потому что
+                        // так просто как в предыдущих случаях
+                        // тут не выйдет
+                        
                         BinaryTreeNode replace = firstMatchingInOrder(
-                            (BinaryTreeNode n) => 
+                            (BinaryTreeNode n) =>
                                 {
                                     if (curr.parent != null)
                                     {
-                                        if ((curr.parent.left == curr  && n.value > curr.parent.value) ||
-                                            (curr.parent.right == curr && n.value < curr.parent.value))
+                                        if ((curr.parent.left == curr &&
+                                             n.value > curr.parent.value) ||
+                                            (curr.parent.right == curr &&
+                                             n.value < curr.parent.value))
                                         {
                                             return false;
                                         }
-                                        if ((curr.left != null && curr.left.value > n.value) || 
-                                            (curr.right != null && curr.right.value < n.value))
+                                        if ((curr.left != null &&
+                                             curr.left.value > n.value) ||
+                                            (curr.right != null &&
+                                             curr.right.value < n.value))
                                         {
                                             return false;
                                         }
@@ -305,17 +428,106 @@ namespace BinaryTree
 
                         if (replace == null)
                         {
-                            /* пиздец */
+                            /*
+                             * плохо (не можем найти замену, 
+                             * а значит не можем удалить) 
+                            */
                         }
                         else
                         {
+                            /*
+                             * Заменяем значение удаляемой вершины
+                             * значением replace
+                             * и удаляем replace
+                            */
+
                             int newCurrValue = replace.value;
                             Remove(replace.value);
                             curr.value = newCurrValue;
                         }
                     }
-
                     break;
+                }
+            }
+        }
+
+        public void Replace(int oldVal, int newVal)
+        {
+            /*
+             * У вершины со значением oldVal
+             * устанавливает новое значение -
+             * newVal
+            */
+
+            if (root == null)
+            {
+                return;
+            }
+
+            BinaryTreeNode curr = root;
+            while (curr != null)
+            {
+                if (oldVal > curr.value)
+                {
+                    // Ищем в правом
+                    // поддереве
+
+                    if (curr.right == null)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        curr = curr.right;
+                    }
+                }
+                else if (oldVal < curr.value)
+                {
+                    // Ищем в левом
+                    // поддереве
+
+                    if (curr.left == null)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        curr = curr.left;
+                    }
+                }
+                else
+                {
+                    // Нашли oldVal в дереве.
+                    // Заменяем
+
+                    if (curr.parent != null)
+                    {
+                        if (curr == curr.parent.left)
+                        {
+                            if (newVal > curr.parent.value)
+                            {
+                                return;
+                            }
+                        }
+                        else if (curr == curr.parent.right)
+                        {
+                            if (newVal < curr.parent.value)
+                            {
+                                return;
+                            }
+                        }
+                    }
+                    
+                    if (curr.left != null && newVal < curr.left.value)
+                    {
+                        return;
+                    }
+                    if (curr.right != null && newVal > curr.right.value)
+                    {
+                        return;
+                    }
+
+                    curr.value = newVal;
                 }
             }
         }
